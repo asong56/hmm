@@ -1,24 +1,25 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from "vite";
+import { viteSingleFile } from "vite-plugin-singlefile";
+import { ViteMinifyPlugin } from 'vite-plugin-minify';
 
 export default defineConfig({
-  build: {
-    outDir: 'dist',
-    // Inline all assets into the HTML — produces single markdown.html
-    assetsInlineLimit: 100 * 1024 * 1024, // 100MB — inline everything
-    rollupOptions: {
-      input: 'index.html',
-      output: {
-        // Single chunk
-        manualChunks: undefined,
-        inlineDynamicImports: true,
-        entryFileNames:   'assets/[name].js',
-        chunkFileNames:   'assets/[name].js',
-        assetFileNames:   'assets/[name].[ext]',
-      },
+    plugins: [
+        viteSingleFile(),
+        ViteMinifyPlugin({
+            collapseWhitespace: true,
+            removeComments: true,
+            minifyCSS: true,
+            minifyJS: true,
+        })
+    ],
+    build: {
+        target: "esnext",
+        assetsInlineLimit: 100000000,
+        minify: "terser", 
+        terserOptions: {
+            compress: {
+                drop_console: true,
+            },
+        },
     },
-  },
-  // In dev, resolve the markdown-it ESM import correctly
-  optimizeDeps: {
-    include: ['markdown-it'],
-  },
 });
